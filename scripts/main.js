@@ -5,6 +5,7 @@ import getIcon, { getStatus } from "./helpers.js";
 // global değişkenler
 
 // haritadaki tıklanan son konum
+let map;
 let clickedCoords;
 let layer;
 let notes = JSON.parse(localStorage.getItem("notes")) || [];
@@ -26,10 +27,19 @@ window.navigator.geolocation.getCurrentPosition(
 function loadMap(currentPosition, msg) {
   console.log(currentPosition);
   // harita kurulum merkez belirleme
-  let map = L.map("map").setView(currentPosition, 8);
+  map = L.map("map", {
+    zoomControl: false,
+  }).setView(currentPosition, 8);
+
+  // sağ aşağıya zoom butonları ekler
+  L.control
+    .zoom({
+      position: "bottomright",
+    })
+    .addTo(map);
+
   // haritayı ekrana basar
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
     attribution:
       '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   }).addTo(map);
@@ -185,5 +195,12 @@ function flyToLocation(id) {
   // id'si bilinen elemanı dizide bul
   const note = notes.find((note) => note.id === +id);
 
-  // note un koord
+  // note un koordinatlarına uç
+  map.flyTo(note.coords, 10);
 }
+
+// tıklanma olayında
+// aside alanındaki form veya liste içeriğini gizlemek için hide class ı ekle
+ui.arrow.addEventListener("click", () => {
+  ui.aside.classList.toggle("hide");
+});
